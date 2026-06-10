@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Response;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +20,38 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Response::macro('apiSuccess', function ($data, $message = "Success", $status = 200) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'data' => $data,
+            ], $status);
+        });
+
+        Response::macro('apiSuccessPaginated', function ($paginator, $message = "Success", $status = 200) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'data' => $paginator->items(),
+                'meta' => [
+                    'current_page' => $paginator->currentPage(),
+                    'last_page' => $paginator->lastPage(),
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                    'links' => [
+                        'next' => $paginator->nextPageUrl(),
+                        'prev' => $paginator->previousPageUrl(),
+                    ],
+                ],
+            ], $status);
+        });
+
+        Response::macro('apiError', function ($message = "Error", $errors = [], $status = 422) {
+            return response()->json([
+                'success' => false,
+                'message' => $message,
+                'errors' => $errors,
+            ], $status);
+        });
     }
 }
