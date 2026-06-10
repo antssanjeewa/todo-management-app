@@ -42,8 +42,6 @@ class TodoController extends Controller
 
   public function update(UpdateTodoRequest $request, Todo $todo): JsonResponse
   {
-    $this->authorize('update', $todo);
-
     $todo = $this->todoService->update($todo, $request->validated());
 
     return response()->apiSuccess(new TodoResource($todo), 'Todo updated successfully');

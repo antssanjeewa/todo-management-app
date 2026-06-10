@@ -2,8 +2,9 @@
 
 namespace App\Http\Requests\Todo;
 
-use Illuminate\Contracts\Validation\ValidationRule;
+use App\Enum\TodoPriority;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
 
 class StoreTodoRequest extends FormRequest
 {
@@ -25,8 +26,8 @@ class StoreTodoRequest extends FormRequest
         return [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
-            'due_date' => 'nullable|date',
-            'priority' => 'nullable|in:low,medium,high'
+            'due_date' => 'nullable|date|after_or_equal:today',
+            'priority' => ['nullable', new Enum(TodoPriority::class)],
         ];
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Todo;
 
-use App\TodoStatus;
-use Illuminate\Contracts\Validation\ValidationRule;
+use App\Enum\TodoPriority;
+use App\Enum\TodoStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 
@@ -14,7 +14,7 @@ class UpdateTodoRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('update', $this->route('todo'));
     }
 
     /**
@@ -28,7 +28,7 @@ class UpdateTodoRequest extends FormRequest
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'due_date' => 'nullable|date',
-            'priority' => 'sometimes|in:low,medium,high',
+            'priority' => ['nullable', new Enum(TodoPriority::class)],
             'status' => ['sometimes', new Enum(TodoStatus::class)],
         ];
     }

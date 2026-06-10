@@ -2,7 +2,8 @@
 
 namespace App\Models;
 
-use App\TodoStatus;
+use App\Enum\TodoPriority;
+use App\Enum\TodoStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,6 +24,7 @@ class Todo extends Model
 
     protected $casts = [
         'status' => TodoStatus::class,
+        'priority' => TodoPriority::class,
         'due_date' => 'date:Y-m-d',
     ];
 
@@ -34,7 +36,7 @@ class Todo extends Model
     public function getIsOverdueAttribute(): bool
     {
         return $this->due_date
-            && $this->status === 'pending'
+            && $this->status === TodoStatus::PENDING
             && $this->due_date->isPast();
     }
 
