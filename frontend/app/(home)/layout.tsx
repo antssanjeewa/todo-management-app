@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
 import api from "@/lib/api";
 import { CheckSquare, LogOut } from "lucide-react";
 import { toast } from "sonner";
+import AppLogo from "@/components/AppLogo";
+import { authService } from "@/services/authService";
 
 export default function DashboardLayout({
 	children,
@@ -14,30 +15,27 @@ export default function DashboardLayout({
 }) {
 	const router = useRouter();
 
-	const handleLogout = async () => {
-		try {
-			await api.post("/logout");
-		} catch (error) {
-		} finally {
-			Cookies.remove("token");
-			toast.success("Logged out successfully");
-			router.push("/login");
-		}
-	};
+		const handleLogout = async () => {
+			try {
+				const response = await authService.logout();
+				if (response.success) {
+					toast.success(response.message);
+					router.push("/login");
+				}
+			} catch (err: any) {
+				console.log("Error: ", err);
+			} finally {
+			}
+		};
+
 
 	return (
 		<div className="min-h-screen flex flex-col bg-[#0B0F19]">
 			<header className="bg-[#111827]/60 backdrop-blur-md border-b border-slate-800/80 px-6 py-4 flex justify-between items-center sticky top-0 z-40">
-				<div className="flex items-center gap-2 text-blue-500 font-bold text-xl tracking-wide">
-					<CheckSquare
-						size={22}
-						className="drop-shadow-[0_0_8px_rgba(59,130,246,0.4)]"
-					/>
-					<span>TaskFlow</span>
-				</div>
+				<AppLogo/>
 				<button
 					onClick={handleLogout}
-					className="flex items-center gap-2 text-sm font-medium text-slate-400 hover:text-red-400 transition-colors bg-slate-800/40 hover:bg-red-500/10 border border-slate-700/60 px-3 py-1.5 rounded-lg"
+					className="flex items-center gap-2 text-sm font-medium text-red-400 hover:text-red-400 transition-colors bg-slate-800/40 hover:bg-red-500/10 border border-red-400/50 px-3 py-1.5 rounded-lg"
 				>
 					<LogOut size={16} />
 					<span>Logout</span>

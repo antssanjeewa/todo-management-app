@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
-import { Todo } from '@/lib/types';
 import { toast } from 'sonner';
 import { Trash2, CheckCircle, Circle, Edit3, Plus, Search, Calendar } from 'lucide-react';
+import { Todo } from '@/types/todo';
 
 export default function DashboardPage() {
     const [todos, setTodos] = useState<Todo[]>([]);
@@ -22,7 +22,7 @@ export default function DashboardPage() {
     const fetchTodos = async () => {
         try {
             const response = await api.get(`/todos?search=${search}&status=${statusFilter}`);
-            setTodos(response.data);
+            setTodos(response.data.todos);
         } catch (error) {
             toast.error('Failed to update task sequence');
         }

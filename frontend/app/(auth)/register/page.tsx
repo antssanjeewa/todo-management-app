@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import AppLogo from "@/components/AppLogo";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,8 @@ export default function RegisterPage() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [passwordConfirmation, setPasswordConfirmation] = useState("");
+	const [showPassword, setShowPassword] = useState(false);
+	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
 
@@ -35,12 +37,12 @@ export default function RegisterPage() {
 				password_confirmation: passwordConfirmation,
 			});
 
-			toast.success("Login successful");
-			// if (response.success === true) {
-			router.push("/dashboard");
-			// }
+			if (response.success) {
+				toast.success(response.message);
+				router.push("/dashboard");
+			}
 		} catch (err: any) {
-			toast.error("Invalid email or password");
+			toast.error(err.message);
 		} finally {
 			setLoading(false);
 		}
@@ -81,24 +83,44 @@ export default function RegisterPage() {
 
 				<div className="space-y-2">
 					<Label>Password</Label>
-					<Input
-						type="password"
-						required
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
-						placeholder="•••••••• (Min 6 characters)"
-					/>
+					<div className="relative">
+						<Input
+							type={showPassword ? "text" : "password"}
+							required
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
+							placeholder="•••••••• (Min 6 characters)"
+							className="pr-10"
+						/>
+						<button
+							type="button"
+							onClick={() => setShowPassword(!showPassword)}
+							className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-black transition-colors"
+						>
+							{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+						</button>
+					</div>
 				</div>
 
 				<div className="space-y-2">
 					<Label>Confirm Password</Label>
-					<Input
-						type="password"
-						required
-						value={passwordConfirmation}
-						onChange={(e) => setPasswordConfirmation(e.target.value)}
-						placeholder="••••••••"
-					/>
+					<div className="relative">
+						<Input
+							type={showConfirmPassword ? "text" : "password"}
+							required
+							value={passwordConfirmation}
+							onChange={(e) => setPasswordConfirmation(e.target.value)}
+							placeholder="••••••••"
+							className="pr-10"
+						/>
+						<button
+							type="button"
+							onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+							className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+						>
+							{showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+						</button>
+					</div>
 				</div>
 
 				<Button type="submit" className="w-full h-11" disabled={loading}>
@@ -119,3 +141,4 @@ export default function RegisterPage() {
 		</div>
 	);
 }
+

@@ -1,18 +1,13 @@
 import api from "@/lib/api";
+import { authCookies } from "@/lib/cookies";
 import { AuthResponse, LoginPayload, RegisterPayload } from "@/types/auth";
-import Cookies from "js-cookie";
 
 export const authService = {
 	async login(credentials: LoginPayload): Promise<AuthResponse> {
 		const response = await api.post<AuthResponse>("/login", credentials);
 
-		// if (response.data.success) {
-		// 	localStorage.setItem("user", JSON.stringify(response.data.data));
-		// 	Cookies.set("user_role", response.data.data.role, { expires: 7 });
-		// 	Cookies.set("auth_token", response.data.data.access_token, {
-		// 		expires: 7,
-		// 	});
-		// }
+		if (response.data.success)
+			authCookies.setToken(response.data.data.access_token);
 
 		return response.data;
 	},
@@ -20,13 +15,19 @@ export const authService = {
 	async register(data: RegisterPayload): Promise<AuthResponse> {
 		const response = await api.post<AuthResponse>("/register", data);
 
+		if (response.data.success)
+			authCookies.setToken(response.data.data.access_token);
+
 		return response.data;
 	},
 
-	async logout(): Promise<void> {
-		await api.post("/logout");
-		localStorage.removeItem("user");
-		window.location.href = "/";
+	async logout(): Promise<any> {
+		const response = await api.post("/logout");
+
+		if (response.data.success)
+			authCookies.removeToken();
+
+		return response.data;
 	},
 
 	// getCurrentUser: () => {
