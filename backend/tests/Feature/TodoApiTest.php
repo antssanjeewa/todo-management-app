@@ -245,11 +245,12 @@ test('user can toggle status of their own todo', function () {
 
     $response->assertStatus(200)
         ->assertJsonPath('success', true)
-        ->assertJsonPath('data.status', TodoStatus::COMPLETED->value);
+        ->assertJsonPath('data.status', TodoStatus::COMPLETED);
 
     $this->assertDatabaseHas('todos', [
         'id' => $todo->id,
-        'status' => TodoStatus::COMPLETED->value,
+        'user_id' => $user->id,
+        'status' => TodoStatus::COMPLETED,
     ]);
 });
 

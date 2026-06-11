@@ -31,14 +31,14 @@ export default function TodoForm({
 	const [title, setTitle] = useState("");
 	const [description, setDescription] = useState("");
 	const [priority, setPriority] = useState<TodoPriority>("medium");
-	const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
+	const [dueDate, setDueDate] = useState<Date | undefined>(new Date());
 
 	useEffect(() => {
 		if (editingTodo) {
 			setTitle(editingTodo.title);
 			setDescription(editingTodo.description || "");
 			setPriority(editingTodo.priority || "medium");
-			setDueDate(editingTodo.due_date ? new Date(editingTodo.due_date) : undefined);
+			setDueDate(editingTodo.due_date ? new Date(editingTodo.due_date) : new Date());
 		} else {
 			clearForm();
 		}
@@ -57,7 +57,7 @@ export default function TodoForm({
 		setTitle("");
 		setDescription("");
 		setPriority("medium");
-		setDueDate(undefined);
+		setDueDate(new Date());
 	}
 
 	const priorityOptions = Object.entries(priorityConfig).map(
@@ -81,29 +81,29 @@ export default function TodoForm({
 			</CardHeader>
 			<CardContent>
 				<form onSubmit={handleSubmit} className="space-y-4">
-					<div className="space-y-1">
+					<div className="space-y-2">
 						<Label>Task Title</Label>
 						<Input
 							type="text"
 							required
 							value={title}
 							onChange={(e) => setTitle(e.target.value)}
-							placeholder="E.g., Review architectural blueprint"
+							placeholder="Enter task title"
 						/>
 					</div>
 
-					<div className="space-y-1">
+					<div className="space-y-2">
 						<Label>Context Notes</Label>
 						<Textarea
 							value={description}
 							onChange={(e) => setDescription(e.target.value)}
-							placeholder="Add auxiliary details..."
+							placeholder="Add task details..."
 							rows={3}
 						/>
 					</div>
 
 					<div className="grid grid-cols-2 gap-3">
-						<div className="space-y-1">
+						<div className="space-y-2">
 							<Label>Priority</Label>
 							<SelectInput
 								value={priority}
@@ -113,7 +113,7 @@ export default function TodoForm({
 							/>
 						</div>
 
-						<div className="space-y-1">
+						<div className="space-y-2">
 							<Label>Due Date</Label>
 							<DatePicker
 								value={dueDate}

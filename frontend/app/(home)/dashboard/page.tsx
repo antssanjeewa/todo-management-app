@@ -16,7 +16,8 @@ export default function DashboardPage() {
 	const [statusFilter, setStatusFilter] = useState<TodoStatus | "all">("all");
 	const [priorityFilter, setPriorityFilter] = useState<TodoPriority | "all">("all");
 	const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
-	const [loading, setLoading] = useState(false);
+	const [loading, setLoading] = useState(true);
+	const [submitting, setSubmitting] = useState(false);
 	const [completedCollapsed, setCompletedCollapsed] = useState(false);
 
 	useEffect(() => {
@@ -24,6 +25,7 @@ export default function DashboardPage() {
 	}, [search, statusFilter, priorityFilter]);
 
 	const fetchTodos = async () => {
+		setLoading(true);
 		try {
 			const res = await todoService.getTodos({
 				search,
@@ -33,6 +35,8 @@ export default function DashboardPage() {
 			setTodos(res.data.todos);
 		} catch (error: any) {
 			toast.error(error.message);
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -42,7 +46,7 @@ export default function DashboardPage() {
 		priority: TodoPriority,
 		dueDate?: Date
 	) => {
-		setLoading(true);
+		setSubmitting(true);
 		try {
 			if (editingTodo) {
 				await todoService.updateTodo(editingTodo.id, {
@@ -67,14 +71,14 @@ export default function DashboardPage() {
 		} catch (error: any) {
 			toast.error(error.message);
 		} finally {
-			setLoading(false);
+			setSubmitting(false);
 		}
 	};
 
 	const toggleStatus = async (todo: Todo) => {
 		try {
 			const res = await todoService.toggleTodo(todo.id);
-			if(res.success){
+			if (res.success) {
 				todo.status = res.data.status;
 				toast.success(res.message);
 				setTodos((prevTodos) =>
@@ -106,7 +110,7 @@ export default function DashboardPage() {
 					editingTodo={editingTodo}
 					onSubmit={handleCreateOrUpdate}
 					onCancel={() => setEditingTodo(null)}
-					loading={loading}
+					loading={submitting}
 				/>
 			</div>
 
@@ -121,7 +125,15 @@ export default function DashboardPage() {
 				/>
 
 				<div className="space-y-4">
-					{todos.length === 0 ? (
+					{loading ? (
+						<div className="animate-pulse">
+							<div className="bg-slate-900 text-center border border-dashed border-slate-800 p-12 rounded-2xl">
+								<p className="text-slate-500 text-sm ">
+									Loading tasks...
+								</p>
+							</div>
+						</div>
+					) : todos.length === 0 ? (
 						<div className="text-center border border-dashed border-slate-800 p-12 rounded-2xl">
 							<p className="text-slate-500 text-sm">
 								No task matrices match selected constraints.
@@ -129,7 +141,7 @@ export default function DashboardPage() {
 						</div>
 					) : (
 						<>
-						
+
 							{pendingTodos.length > 0 && (
 								<div className="space-y-3">
 									{pendingTodos.map((todo) => (
@@ -144,7 +156,7 @@ export default function DashboardPage() {
 								</div>
 							)}
 
-						
+
 							{completedTodos.length > 0 && (
 								<div className="space-y-3">
 									<div className="flex items-center gap-3 pt-2">

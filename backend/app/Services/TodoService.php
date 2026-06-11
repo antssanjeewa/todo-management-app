@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enum\TodoStatus;
 use App\Models\Todo;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
@@ -42,8 +43,8 @@ class TodoService
 
     return [
       'total' => (clone $base)->count(),
-      'completed' => (clone $base)->where('status', 'completed')->count(),
-      'pending' => (clone $base)->where('status', 'pending')->count(),
+      'completed' => (clone $base)->where('status', TodoStatus::COMPLETED)->count(),
+      'pending' => (clone $base)->where('status', TodoStatus::PENDING)->count(),
     ];
   }
 
@@ -66,7 +67,7 @@ class TodoService
   public function toggleStatus(Todo $todo): Todo
   {
     $todo->update([
-      'status' => $todo->status === 'completed' ? 'pending' : 'completed',
+      'status' => $todo->status === TodoStatus::COMPLETED ? TodoStatus::PENDING : TodoStatus::COMPLETED,
     ]);
     return $todo->fresh();
   }

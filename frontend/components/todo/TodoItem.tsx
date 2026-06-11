@@ -25,9 +25,8 @@ export default function TodoItem({
 
 	return (
 		<div
-			className={`flex items-start justify-between p-4 bg-[#111827]/30 rounded-xl border border-slate-800/80 hover:border-slate-700/80 transition-all shadow-sm ${
-				isCompleted ? "opacity-60" : ""
-			}`}
+			className={`flex items-start justify-between p-4 bg-[#111827]/30 rounded-xl border border-slate-800/80 hover:border-slate-700/80 transition-all shadow-sm ${isCompleted ? "opacity-60" : ""
+				}`}
 		>
 			<div className="flex gap-4">
 				<button
@@ -53,37 +52,33 @@ export default function TodoItem({
 					</div>
 					{todo.description && (
 						<p
-							className={`text-sm text-slate-400 mt-1 whitespace-pre-line ${
-								isCompleted ? "line-through text-slate-600" : ""
-							}`}
+							className={`text-sm text-slate-400 mt-1 whitespace-pre-line ${isCompleted ? "line-through text-slate-600" : ""
+								}`}
 						>
 							{todo.description}
 						</p>
 					)}
-					<div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600">
-						<div className="flex items-center gap-1">
-							<Calendar size={12} />
-							<span>
-								{formatDate(new Date(todo.created_at))}
-							</span>
-						</div>
-
-						{todo.due_date && (
-							<div
-								className={`flex items-center gap-1 ${todo.is_overdue ? "text-red-400 font-medium" : "text-slate-500"}`}
-							>
-								{todo.is_overdue ? (
-									<AlertCircle size={12} className="text-red-400 animate-pulse" />
-								) : (
-									<Calendar size={12} />
-								)}
+					{todo.due_date && (
+						<div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600">
+							<div className="flex items-center gap-1">
+								<Calendar size={12} />
 								<span>
-									Due:{" "}
 									{formatDate(new Date(todo.due_date))}
 								</span>
 							</div>
-						)}
-					</div>
+
+							<div
+								className={`flex items-center gap-1 ${todo.is_overdue ? "text-red-400 font-medium" : "text-slate-500"}`}
+							>
+								{todo.is_overdue && (
+									<div className="flex items-center gap-1">
+										<AlertCircle size={12} className="text-red-400 animate-pulse" />
+										<span>Overdue</span>
+									</div>
+								)}
+							</div>
+						</div>
+					)}
 				</div>
 			</div>
 
