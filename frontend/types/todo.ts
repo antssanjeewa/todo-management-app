@@ -19,13 +19,14 @@ export interface TodoFilters {
   search?: string;
   status?: TodoStatus | "all";
   priority?: TodoPriority | "all";
+  page?: number;
 }
 
 export interface CreateTodoPayload {
   title: string;
   description?: string;
   priority?: TodoPriority;
-  due_date?: Date;
+  due_date?: string;
 }
 
 export interface UpdateTodoPayload {
@@ -33,7 +34,7 @@ export interface UpdateTodoPayload {
   description?: string;
   status?: TodoStatus;
   priority?: TodoPriority;
-  due_date?: Date;
+  due_date?: string;
 }
 
 export type TodoResponse = ApiResponse<Todo>;

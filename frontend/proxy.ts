@@ -7,12 +7,13 @@ export function proxy(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 	const token = request.cookies.get("auth_token")?.value;
 	const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+	const isRoot = pathname === "/";
 
-	if (!token && !isPublic) {
+	if (!token && !isPublic && !isRoot) {
 		return NextResponse.redirect(new URL("/login", request.url));
 	}
 
-	if (token && isPublic) {
+	if (token && (isPublic || isRoot)) {
 		return NextResponse.redirect(new URL("/dashboard", request.url));
 	}
 
@@ -20,5 +21,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-	matcher: ["/dashboard/:path*", "/login", "/register"],
+	matcher: ["/", "/dashboard/:path*", "/login", "/register"],
 };

@@ -7,6 +7,7 @@ export const todoService = {
 		if (filters.search) params.append("search", filters.search);
 		if (filters.status) params.append("status", filters.status);
 		if (filters.priority) params.append("priority", filters.priority);
+		if (filters.page) params.append("page", filters.page.toString());
 
 		const response = await api.get<TodoListResponse>(`/todos?${params.toString()}`, { signal });
 		return response.data;

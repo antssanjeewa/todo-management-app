@@ -8,6 +8,8 @@ import { useTodos } from "@/hooks/useTodos";
 import TodoForm from "@/components/todo/TodoForm";
 import TodoFilters from "@/components/todo/TodoFilters";
 import TodoList from "@/components/todo/TodoList";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 export default function DashboardPage() {
 	const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
@@ -22,7 +24,11 @@ export default function DashboardPage() {
 
 	const {
 		todos,
+		meta,
 		loading,
+		loadingMore,
+		hasMore,
+		loadMore,
 		createTodo,
 		updateTodo,
 		toggleStatus,
@@ -44,11 +50,11 @@ export default function DashboardPage() {
 					description,
 					priority,
 					status: editingTodo.status,
-					due_date: dueDate,
+					due_date: dueDate?.toLocaleDateString(),
 				});
 				setEditingTodo(null);
 			} else {
-				await createTodo({ title, description, priority, due_date: dueDate });
+				await createTodo({ title, description, priority, due_date: dueDate?.toLocaleDateString() });
 			}
 		} catch (error: any) {
 			toast.error(error.message ?? "Something went wrong");
@@ -85,6 +91,12 @@ export default function DashboardPage() {
 			</div>
 
 			<div className="lg:col-span-2 space-y-5">
+				<div className="flex items-center gap-3 pt-2">
+					<div className="h-px bg-slate-800/80 flex-1" />
+					<span>Task List ({meta?.total ?? 0})</span>
+					<div className="h-px bg-slate-800/80 flex-1" />
+				</div>
+
 				<TodoFilters
 					search={search}
 					onSearchChange={setSearch}
@@ -100,12 +112,34 @@ export default function DashboardPage() {
 					) : todos.length === 0 ? (
 						<EmptyState />
 					) : (
-						<TodoList
-							todos={todos}
-							onToggleStatus={handleToggle}
-							onEdit={setEditingTodo}
-							onDelete={handleDelete}
-						/>
+						<>
+							<TodoList
+								todos={todos}
+								onToggleStatus={handleToggle}
+								onEdit={setEditingTodo}
+								onDelete={handleDelete}
+							/>
+							{hasMore && (
+								<div className="flex justify-center pt-4">
+									<Button
+										type="button"
+										variant="outline"
+										onClick={loadMore}
+										disabled={loadingMore}
+										className="w-full sm:w-auto px-6 h-10 border-slate-800 hover:bg-slate-900 text-slate-300 hover:text-white"
+									>
+										{loadingMore ? (
+											<>
+												<Loader2 size={16} className="animate-spin mr-2" />
+												Loading...
+											</>
+										) : (
+											"Load More Tasks"
+										)}
+									</Button>
+								</div>
+							)}
+						</>
 					)}
 				</div>
 			</div>
