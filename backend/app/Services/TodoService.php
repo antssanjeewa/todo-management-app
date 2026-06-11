@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Todo;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class TodoService
 {
@@ -14,9 +15,10 @@ class TodoService
 
     if (!empty($filters['search'])) {
       $search = $filters['search'];
-      $query->where(function ($q) use ($search) {
-        $q->where('title', 'ilike', "%{$search}%")
-          ->orWhere('description', 'ilike', "%{$search}%");
+      $likeOperator = DB::connection()->getDriverName() === 'sqlite' ? 'like' : 'ilike';
+      $query->where(function ($q) use ($search, $likeOperator) {
+        $q->where('title', $likeOperator, "%{$search}%")
+          ->orWhere('description', $likeOperator, "%{$search}%");
       });
     }
 
