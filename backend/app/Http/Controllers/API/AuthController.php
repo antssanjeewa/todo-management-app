@@ -3,69 +3,58 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Http\Responses\ApiResponse;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
+  public function __construct(protected AuthService $authService)
+  {
+  }
+
   /**
    * Register a new user
    */
-  public function register(Request $request): JsonResponse
+  public function register(RegisterRequest $request): JsonResponse
   {
-    $validated = $request->validate([
-      'name' => 'required|string|max:255',
-      'email' => 'required|string|email|max:255|unique:users',
-      'password' => 'required|string|min:8|confirmed',
-      'password_confirmation' => 'required',
-    ]);
+    $user = $this->authService->register($request->validated());
 
-    $user = User::create($validated);
-
-    $token = $user->createToken('auth_token')->plainTextToken;
-    $user['access_token'] = $token;
-
-    return response()->apiSuccess($user, 'Registration successful!', 201);
+    return ApiResponse::success($user, 'Registration successful!', 201);
   }
 
   /**
-   * Login user and return token
+   * Login user
    */
-  public function login(Request $request): JsonResponse
+  public function login(LoginRequest $request): JsonResponse
   {
-    $request->validate([
-      'email' => 'required|email',
-      'password' => 'required|string',
-    ]);
+    $user = $this->authService->login($request->validated());
 
-    if (!Auth::attempt($request->only('email', 'password'))) {
-      return response()->apiError('Invalid credentials.', ['email' => ['The provided credentials are incorrect.']], 401);
+    if (!$user) {
+      return ApiResponse::error('Invalid credentials.', 401, ['email' => ['The provided credentials are incorrect.']]);
     }
 
-    $user = User::where('email', $request->email)->firstOrFail();
-    $token = $user->createToken('auth_token')->plainTextToken;
-    $user['access_token'] = $token;
-
-    return response()->apiSuccess($user, 'Login successful');
+    return ApiResponse::success($user, 'Login successful');
   }
 
   /**
-   * Logout user (revoke current token)
+   * Logout user
    */
   public function logout(Request $request): JsonResponse
   {
-    $request->user()->currentAccessToken()->delete();
+    $this->authService->logout($request->user());
 
-    return response()->apiSuccess(null, 'Logged out successfully');
+    return ApiResponse::success(null, 'Logged out successfully');
   }
 
   /**
-   * Get currently authenticated user
+   * Get current user
    */
   public function user(Request $request): JsonResponse
   {
-    return response()->apiSuccess($request->user());
+    return ApiResponse::success($request->user());
   }
 }

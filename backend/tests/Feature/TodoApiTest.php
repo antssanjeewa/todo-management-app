@@ -20,8 +20,8 @@ test('user can list only their own todos', function () {
         ->getJson('/api/todos');
 
     $response->assertStatus(200)
-        ->assertJsonCount(3, 'todos')
-        ->assertJsonPath('counts.total', 3);
+        ->assertJsonCount(3, 'data.todos')
+        ->assertJsonPath('data.counts.total', 3);
 });
 
 test('user can filter todos by status', function () {
@@ -41,7 +41,7 @@ test('user can filter todos by status', function () {
         ->getJson('/api/todos?status=completed');
 
     $response->assertStatus(200)
-        ->assertJsonCount(1, 'todos');
+        ->assertJsonCount(1, 'data.todos');
 });
 
 test('user can filter todos by priority', function () {
@@ -61,7 +61,7 @@ test('user can filter todos by priority', function () {
         ->getJson('/api/todos?priority=high');
 
     $response->assertStatus(200)
-        ->assertJsonCount(1, 'todos');
+        ->assertJsonCount(1, 'data.todos');
 });
 
 test('user can search todos by title or description', function () {
@@ -89,7 +89,7 @@ test('user can search todos by title or description', function () {
         ->getJson('/api/todos?search=Searchable');
 
     $response->assertStatus(200)
-        ->assertJsonCount(2, 'todos');
+        ->assertJsonCount(2, 'data.todos');
 });
 
 /**

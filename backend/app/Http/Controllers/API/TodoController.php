@@ -10,6 +10,7 @@ use App\Models\Todo;
 use App\Services\TodoService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Responses\ApiResponse;
 
 class TodoController extends Controller
 {
@@ -18,6 +19,10 @@ class TodoController extends Controller
   {
   }
 
+  /**
+   * List all todos
+   * 
+   */
   public function index(Request $request): JsonResponse
   {
 
@@ -26,7 +31,7 @@ class TodoController extends Controller
     $todos = $this->todoService->getFilteredTodos($request->user(), $request->only('search', 'status', 'priority'));
     $counts = $this->todoService->getCounts($request->user());
 
-    return response()->apiSuccess(
+    return ApiResponse::success(
       [
         'todos' => TodoResource::collection($todos),
         'counts' => $counts,
@@ -34,35 +39,51 @@ class TodoController extends Controller
     );
   }
 
+  /**
+   * Create a todo
+   *
+   */
   public function store(StoreTodoRequest $request): JsonResponse
   {
     $todo = $this->todoService->create($request->user(), $request->validated());
 
-    return response()->apiSuccess(new TodoResource($todo), 'Todo created successfully', 201);
+    return ApiResponse::success(new TodoResource($todo), 'Todo created successfully', 201);
   }
 
+  /**
+   * Update a todo
+   * 
+   */
   public function update(UpdateTodoRequest $request, Todo $todo): JsonResponse
   {
     $todo = $this->todoService->update($todo, $request->validated());
 
-    return response()->apiSuccess(new TodoResource($todo), 'Todo updated successfully');
+    return ApiResponse::success(new TodoResource($todo), 'Todo updated successfully');
   }
 
+  /**
+   * Delete a todo
+   * 
+   */
   public function destroy(Request $request, Todo $todo): JsonResponse
   {
     $this->authorize('delete', $todo);
 
     $this->todoService->delete($todo);
 
-    return response()->apiSuccess(null, 'Todo deleted successfully');
+    return ApiResponse::success(null, 'Todo deleted successfully');
   }
 
+  /**
+   * Toggle status of a todo
+   * 
+   */
   public function toggleStatus(Request $request, Todo $todo): JsonResponse
   {
     $this->authorize('update', $todo);
 
     $todo = $this->todoService->toggleStatus($todo);
 
-    return response()->apiSuccess(new TodoResource($todo), 'Status updated');
+    return ApiResponse::success(new TodoResource($todo), 'Status updated');
   }
 }
