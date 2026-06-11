@@ -68,7 +68,7 @@ test('user registration fails with validation errors', function () {
 test('user can login successfully', function () {
     $password = 'secret123';
     $user = User::factory()->create([
-        'password' => Hash::make($password),
+        'password' => $password,
     ]);
 
     $response = $this->postJson('/api/login', [

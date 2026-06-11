@@ -8,6 +8,8 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\Http\Responses\ApiResponse;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -33,7 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        $exceptions->render(function (AuthorizationException $e, Request $request) {
+        $exceptions->render(function (AuthorizationException|AccessDeniedHttpException $e, Request $request) {
             if ($request->is('api/*')) {
                 return ApiResponse::error('Forbidden.', 403);
             }

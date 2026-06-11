@@ -29,14 +29,8 @@ class TodoController extends Controller
     $this->authorize('viewAny', Todo::class);
 
     $todos = $this->todoService->getFilteredTodos($request->user(), $request->only('search', 'status', 'priority'));
-    $counts = $this->todoService->getCounts($request->user());
 
-    return ApiResponse::success(
-      [
-        'todos' => TodoResource::collection($todos),
-        'counts' => $counts,
-      ]
-    );
+    return ApiResponse::paginated($todos, TodoResource::class);
   }
 
   /**

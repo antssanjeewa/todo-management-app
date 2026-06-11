@@ -1,5 +1,5 @@
 import axios from "axios";
-import Cookies from "js-cookie";
+import { authCookies } from "./cookies";
 
 const api = axios.create({
 	baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -11,7 +11,7 @@ const api = axios.create({
 
 api.interceptors.request.use(
 	(config) => {
-		const token = Cookies.get("auth_token");
+		const token = authCookies.getToken();
 		if (token) {
 			config.headers.Authorization = `Bearer ${token}`;
 		}
@@ -22,31 +22,39 @@ api.interceptors.request.use(
 	},
 );
 
+api.interceptors.response.use(
+	(response) => response,
+	(error) => {
+		const status = error.response?.status;
+
+		if (status === 401) {
+			const isAuthPage = typeof window !== "undefined" &&
+				(window.location.pathname === "/login" || window.location.pathname === "/register");
+
+			if (!isAuthPage) {
+				authCookies.removeToken();
+				if (typeof window !== "undefined") {
+					window.location.href = "/login";
+				}
+			}
+		}
+
+		const data = error.response?.data;
+
+		if (data?.errors && typeof data.errors === "object") {
+			const messages = Object.values(data.errors).flat();
+
+			if (messages.length > 0) {
+				error.userMessage = messages.join("\n");
+			} else {
+				error.userMessage = data.message || "Something went wrong";
+			}
+		} else {
+			error.userMessage = data?.message || error.message;
+		}
+
+		return Promise.reject(error);
+	},
+);
+
 export default api;
-
-// api.interceptors.request.use((config) => {
-//   const user = localStorage.getItem("user");
-//   const token = user ? JSON.parse(user).access_token : null
-
-//   if (token) {
-//     config.headers.Authorization = `Bearer ${token}`;
-//   }
-
-//   return config;
-// });
-
-// api.interceptors.response.use(
-//     (response) => response,
-//     (error) => {
-//         if (error.response && error.response.status === 401) {
-//             localStorage.removeItem("user");
-//             window.location.href = '/';
-//         }
-
-//         if (error.response?.data?.message) {
-//             error.message = error.response.data.message;
-//         }
-
-//         return Promise.reject(error);
-//     }
-// );

@@ -2,13 +2,13 @@ import api from "@/lib/api";
 import { Todo, TodoFilters, CreateTodoPayload, UpdateTodoPayload, TodoResponse, TodoListResponse } from "@/types/todo";
 
 export const todoService = {
-	async getTodos(filters: TodoFilters = {}): Promise<TodoListResponse> {
+	async getTodos(filters: TodoFilters = {}, signal?: AbortSignal): Promise<TodoListResponse> {
 		const params = new URLSearchParams();
 		if (filters.search) params.append("search", filters.search);
 		if (filters.status) params.append("status", filters.status);
 		if (filters.priority) params.append("priority", filters.priority);
 
-		const response = await api.get<TodoListResponse>(`/todos?${params.toString()}`);
+		const response = await api.get<TodoListResponse>(`/todos?${params.toString()}`, { signal });
 		return response.data;
 	},
 

@@ -1,4 +1,5 @@
 import { priorityConfig, statusConfig } from "@/lib/constants";
+import { ApiResponse, PaginationResponse } from "./api";
 
 export type TodoPriority = keyof typeof priorityConfig;
 export type TodoStatus = keyof typeof statusConfig;
@@ -35,21 +36,6 @@ export interface UpdateTodoPayload {
   due_date?: Date;
 }
 
-export interface TodoResponse {
-  success: boolean;
-  message: string;
-  data: Todo;
-}
+export type TodoResponse = ApiResponse<Todo>;
 
-export interface TodoListResponse {
-  success: boolean;
-  message: string;
-  data: {
-    todos: Todo[];
-    counts: {
-      total: number;
-      pending: number;
-      completed: number;
-    };
-  };
-}
+export type TodoListResponse = PaginationResponse<Todo[]>;

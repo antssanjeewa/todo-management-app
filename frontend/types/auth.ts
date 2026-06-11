@@ -1,3 +1,5 @@
+import { ApiResponse } from "./api";
+
 export interface User {
 	id: number;
 	name: string;
@@ -17,8 +19,5 @@ export interface RegisterPayload {
 	password_confirmation: string;
 }
 
-export interface AuthResponse {
-	data: User;
-	message: string;
-	success: boolean;
-}
+export type AuthResponse = ApiResponse<User>;
+

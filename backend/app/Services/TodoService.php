@@ -5,12 +5,12 @@ namespace App\Services;
 use App\Enum\TodoStatus;
 use App\Models\Todo;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class TodoService
 {
-  public function getFilteredTodos(User $user, array $filters): Collection
+  public function getFilteredTodos(User $user, array $filters): LengthAwarePaginator
   {
     $query = Todo::where('user_id', $user->id);
 
@@ -33,19 +33,8 @@ class TodoService
 
     return $query
       ->orderByRaw("CASE status WHEN 'pending' THEN 0 ELSE 1 END")
-      ->orderBy('created_at', 'desc')
-      ->get();
-  }
-
-  public function getCounts(User $user): array
-  {
-    $base = Todo::where('user_id', $user->id);
-
-    return [
-      'total' => (clone $base)->count(),
-      'completed' => (clone $base)->where('status', TodoStatus::COMPLETED)->count(),
-      'pending' => (clone $base)->where('status', TodoStatus::PENDING)->count(),
-    ];
+      ->latest()
+      ->paginate();
   }
 
   public function create(User $user, array $data): Todo

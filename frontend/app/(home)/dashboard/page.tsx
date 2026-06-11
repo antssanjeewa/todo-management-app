@@ -1,46 +1,36 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { ChevronDown, ChevronRight } from "lucide-react";
-import { Todo, TodoStatus } from "@/types/todo";
-import { todoService } from "@/services/todoService";
+import { Todo, TodoPriority } from "@/types/todo";
+import { useFilters } from "@/hooks/useFilters";
+import { useTodos } from "@/hooks/useTodos";
 import TodoForm from "@/components/todo/TodoForm";
-import TodoItem from "@/components/todo/TodoItem";
 import TodoFilters from "@/components/todo/TodoFilters";
-import { TodoPriority } from "@/types/todo";
+import TodoList from "@/components/todo/TodoList";
 
 export default function DashboardPage() {
-	const [todos, setTodos] = useState<Todo[]>([]);
-	const [search, setSearch] = useState("");
-	const [statusFilter, setStatusFilter] = useState<TodoStatus | "all">("all");
-	const [priorityFilter, setPriorityFilter] = useState<TodoPriority | "all">("all");
 	const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
-	const [loading, setLoading] = useState(true);
 	const [submitting, setSubmitting] = useState(false);
-	const [completedCollapsed, setCompletedCollapsed] = useState(false);
 
-	useEffect(() => {
-		fetchTodos();
-	}, [search, statusFilter, priorityFilter]);
+	const {
+		search, setSearch,
+		statusFilter, setStatusFilter,
+		priorityFilter, setPriorityFilter,
+		filters,
+	} = useFilters();
 
-	const fetchTodos = async () => {
-		setLoading(true);
-		try {
-			const res = await todoService.getTodos({
-				search,
-				status: statusFilter,
-				priority: priorityFilter,
-			});
-			setTodos(res.data.todos);
-		} catch (error: any) {
-			toast.error(error.message);
-		} finally {
-			setLoading(false);
-		}
-	};
+	const {
+		todos,
+		loading,
+		createTodo,
+		updateTodo,
+		toggleStatus,
+		deleteTodo,
+	} = useTodos(filters);
 
-	const handleCreateOrUpdate = async (
+
+	const handleSubmit = async (
 		title: string,
 		description: string,
 		priority: TodoPriority,
@@ -49,66 +39,46 @@ export default function DashboardPage() {
 		setSubmitting(true);
 		try {
 			if (editingTodo) {
-				await todoService.updateTodo(editingTodo.id, {
+				await updateTodo(editingTodo.id, {
 					title,
 					description,
-					status: editingTodo.status,
 					priority,
-					due_date: dueDate || undefined,
+					status: editingTodo.status,
+					due_date: dueDate,
 				});
-				toast.success("Task details updated");
 				setEditingTodo(null);
 			} else {
-				await todoService.createTodo({
-					title,
-					description,
-					priority,
-					due_date: dueDate || undefined,
-				});
-				toast.success("New task logged successfully");
+				await createTodo({ title, description, priority, due_date: dueDate });
 			}
-			fetchTodos();
 		} catch (error: any) {
-			toast.error(error.message);
+			toast.error(error.message ?? "Something went wrong");
 		} finally {
 			setSubmitting(false);
 		}
 	};
 
-	const toggleStatus = async (todo: Todo) => {
+	const handleDelete = async (id: number) => {
 		try {
-			const res = await todoService.toggleTodo(todo.id);
-			if (res.success) {
-				todo.status = res.data.status;
-				toast.success(res.message);
-				setTodos((prevTodos) =>
-					prevTodos.map((t) => (t.id === todo.id ? res.data : t))
-				);
-			}
-		} catch (error: any) {
-			toast.error(error.message);
+			await deleteTodo(id);
+		} catch {
+			toast.error("Could not delete task");
 		}
 	};
 
-	const deleteTodo = async (id: number) => {
+	const handleToggle = async (todo: Todo) => {
 		try {
-			await todoService.deleteTodo(id);
-			toast.success("Task removed securely");
-			fetchTodos();
-		} catch (error) {
-			toast.error("Could not process deletion");
+			await toggleStatus(todo);
+		} catch {
+			toast.error("Could not update task status");
 		}
 	};
-
-	const pendingTodos = todos.filter((todo) => todo.status !== "completed");
-	const completedTodos = todos.filter((todo) => todo.status === "completed");
 
 	return (
 		<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 			<div className="h-fit">
 				<TodoForm
 					editingTodo={editingTodo}
-					onSubmit={handleCreateOrUpdate}
+					onSubmit={handleSubmit}
 					onCancel={() => setEditingTodo(null)}
 					loading={submitting}
 				/>
@@ -126,75 +96,39 @@ export default function DashboardPage() {
 
 				<div className="space-y-4">
 					{loading ? (
-						<div className="animate-pulse">
-							<div className="bg-slate-900 text-center border border-dashed border-slate-800 p-12 rounded-2xl">
-								<p className="text-slate-500 text-sm ">
-									Loading tasks...
-								</p>
-							</div>
-						</div>
+						<LoadingState />
 					) : todos.length === 0 ? (
-						<div className="text-center border border-dashed border-slate-800 p-12 rounded-2xl">
-							<p className="text-slate-500 text-sm">
-								No task matrices match selected constraints.
-							</p>
-						</div>
+						<EmptyState />
 					) : (
-						<>
-
-							{pendingTodos.length > 0 && (
-								<div className="space-y-3">
-									{pendingTodos.map((todo) => (
-										<TodoItem
-											key={todo.id}
-											todo={todo}
-											onToggleStatus={toggleStatus}
-											onEdit={setEditingTodo}
-											onDelete={deleteTodo}
-										/>
-									))}
-								</div>
-							)}
-
-
-							{completedTodos.length > 0 && (
-								<div className="space-y-3">
-									<div className="flex items-center gap-3 pt-2">
-										<div className="h-px bg-slate-800/80 flex-1"></div>
-										<button
-											type="button"
-											onClick={() => setCompletedCollapsed(!completedCollapsed)}
-											className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-400 transition-colors uppercase tracking-wider select-none"
-										>
-											{completedCollapsed ? (
-												<ChevronRight size={14} />
-											) : (
-												<ChevronDown size={14} />
-											)}
-											<span>Completed Tasks ({completedTodos.length})</span>
-										</button>
-										<div className="h-px bg-slate-800/80 flex-1"></div>
-									</div>
-
-									{!completedCollapsed && (
-										<div className="space-y-3">
-											{completedTodos.map((todo) => (
-												<TodoItem
-													key={todo.id}
-													todo={todo}
-													onToggleStatus={toggleStatus}
-													onEdit={setEditingTodo}
-													onDelete={deleteTodo}
-												/>
-											))}
-										</div>
-									)}
-								</div>
-							)}
-						</>
+						<TodoList
+							todos={todos}
+							onToggleStatus={handleToggle}
+							onEdit={setEditingTodo}
+							onDelete={handleDelete}
+						/>
 					)}
 				</div>
 			</div>
+		</div>
+	);
+}
+
+function LoadingState() {
+	return (
+		<div className="animate-pulse">
+			<div className="bg-slate-900 text-center border border-dashed border-slate-800 p-12 rounded-2xl">
+				<p className="text-slate-500 text-sm">Loading tasks...</p>
+			</div>
+		</div>
+	);
+}
+
+function EmptyState() {
+	return (
+		<div className="text-center border border-dashed border-slate-800 p-12 rounded-2xl">
+			<p className="text-slate-500 text-sm">
+				No task matrices match selected constraints.
+			</p>
 		</div>
 	);
 }

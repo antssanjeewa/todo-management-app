@@ -24,12 +24,11 @@ class ApiResponse
         ], $status);
     }
 
-    public static function paginated($paginator, string $message = 'Success', int $status = 200): JsonResponse
+    public static function paginated($paginator, string $resource, int $status = 200): JsonResponse
     {
         return response()->json([
             'success' => true,
-            'message' => $message,
-            'data' => $paginator->items(),
+            'data' => $resource::collection($paginator->items()),
             'meta' => [
                 'total' => $paginator->total(),
                 'current_page' => $paginator->currentPage(),
