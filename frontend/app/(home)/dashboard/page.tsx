@@ -3,17 +3,18 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { Todo } from "@/types/todo";
+import { Todo, TodoStatus } from "@/types/todo";
 import { todoService } from "@/services/todoService";
 import TodoForm from "@/components/todo/TodoForm";
 import TodoItem from "@/components/todo/TodoItem";
 import TodoFilters from "@/components/todo/TodoFilters";
+import { TodoPriority } from "@/types/todo";
 
 export default function DashboardPage() {
 	const [todos, setTodos] = useState<Todo[]>([]);
 	const [search, setSearch] = useState("");
-	const [statusFilter, setStatusFilter] = useState("all");
-	const [priorityFilter, setPriorityFilter] = useState("all");
+	const [statusFilter, setStatusFilter] = useState<TodoStatus | "all">("all");
+	const [priorityFilter, setPriorityFilter] = useState<TodoPriority | "all">("all");
 	const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [completedCollapsed, setCompletedCollapsed] = useState(false);
@@ -24,22 +25,22 @@ export default function DashboardPage() {
 
 	const fetchTodos = async () => {
 		try {
-			const data = await todoService.getTodos({
+			const res = await todoService.getTodos({
 				search,
 				status: statusFilter,
 				priority: priorityFilter,
 			});
-			setTodos(data);
-		} catch (error) {
-			toast.error("Failed to update task sequence");
+			setTodos(res.data.todos);
+		} catch (error: any) {
+			toast.error(error.message);
 		}
 	};
 
 	const handleCreateOrUpdate = async (
 		title: string,
 		description: string,
-		priority: "low" | "medium" | "high",
-		dueDate: string
+		priority: TodoPriority,
+		dueDate?: Date
 	) => {
 		setLoading(true);
 		try {
@@ -63,26 +64,25 @@ export default function DashboardPage() {
 				toast.success("New task logged successfully");
 			}
 			fetchTodos();
-		} catch (error) {
-			toast.error("Operation failed");
+		} catch (error: any) {
+			toast.error(error.message);
 		} finally {
 			setLoading(false);
 		}
 	};
 
 	const toggleStatus = async (todo: Todo) => {
-		const nextStatus = todo.status === "pending" ? "completed" : "pending";
 		try {
-			await todoService.updateTodo(todo.id, {
-				title: todo.title,
-				description: todo.description || undefined,
-				status: nextStatus,
-				priority: todo.priority,
-				due_date: todo.due_date || undefined,
-			});
-			fetchTodos();
-		} catch (error) {
-			toast.error("Status synchronization error");
+			const res = await todoService.toggleTodo(todo.id);
+			if(res.success){
+				todo.status = res.data.status;
+				toast.success(res.message);
+				setTodos((prevTodos) =>
+					prevTodos.map((t) => (t.id === todo.id ? res.data : t))
+				);
+			}
+		} catch (error: any) {
+			toast.error(error.message);
 		}
 	};
 
@@ -129,7 +129,7 @@ export default function DashboardPage() {
 						</div>
 					) : (
 						<>
-							{/* Active/Pending Todos */}
+						
 							{pendingTodos.length > 0 && (
 								<div className="space-y-3">
 									{pendingTodos.map((todo) => (
@@ -144,7 +144,7 @@ export default function DashboardPage() {
 								</div>
 							)}
 
-							{/* Completed Divider and List */}
+						
 							{completedTodos.length > 0 && (
 								<div className="space-y-3">
 									<div className="flex items-center gap-3 pt-2">

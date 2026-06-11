@@ -1,21 +1,17 @@
 import React from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
+import SelectInput from "@/components/SelectInput";
+import { TodoPriority, TodoStatus } from "@/types/todo";
+import { priorityConfig, statusConfig } from "@/lib/constants";
 
 interface TodoFiltersProps {
 	search: string;
 	onSearchChange: (value: string) => void;
-	statusFilter: string;
-	onStatusFilterChange: (value: string) => void;
-	priorityFilter: string;
-	onPriorityFilterChange: (value: string) => void;
+	statusFilter: TodoStatus | "all";
+	onStatusFilterChange: (value: TodoStatus | "all") => void;
+	priorityFilter: TodoPriority | "all";
+	onPriorityFilterChange: (value: TodoPriority | "all") => void;
 }
 
 export default function TodoFilters({
@@ -26,6 +22,24 @@ export default function TodoFilters({
 	priorityFilter,
 	onPriorityFilterChange,
 }: TodoFiltersProps) {
+
+	
+	const priorityOptions = [
+  { value: "all", label: "All Priorities" },
+  ...Object.entries(priorityConfig).map(([value, config]) => ({
+    value,
+    label: config.label,
+  })),
+];
+
+	const statusOptions = [
+		{ value: "all", label: "All Statuses" },
+		...Object.entries(statusConfig).map(([value, config]) => ({
+			value,
+			label: config.label,
+		})),
+	];
+
 	return (
 		<div className="flex flex-col sm:flex-row gap-3">
 			<div className="relative flex-1">
@@ -35,33 +49,24 @@ export default function TodoFilters({
 					placeholder="Query entries via key terms..."
 					value={search}
 					onChange={(e) => onSearchChange(e.target.value)}
-					className="w-full bg-[#111827]/50 border-slate-800/80 pl-10 pr-4 py-2 text-sm text-white focus-visible:border-blue-500 focus-visible:ring-blue-500/20 placeholder:text-slate-500 h-10"
+					className="pl-10"
 				/>
 			</div>
 			
 			<div className="flex gap-2">
-				<Select value={statusFilter} onValueChange={onStatusFilterChange}>
-					<SelectTrigger className="w-full sm:w-[160px] h-10 bg-[#111827]/50 border-slate-800/80 text-slate-300 hover:bg-slate-800/40 focus:border-blue-500 focus:ring-blue-500/20">
-						<SelectValue placeholder="All Statuses" />
-					</SelectTrigger>
-					<SelectContent className="bg-[#111827] border-slate-800 text-slate-300">
-						<SelectItem value="">All Statuses</SelectItem>
-						<SelectItem value="pending">Pending</SelectItem>
-						<SelectItem value="completed">Completed</SelectItem>
-					</SelectContent>
-				</Select>
+				<SelectInput
+					value={statusFilter}
+					onValueChange={(val) => onStatusFilterChange(val as TodoStatus | 'all')}
+					placeholder="All Statuses"
+					options={statusOptions}
+				/>
 
-				<Select value={priorityFilter} onValueChange={onPriorityFilterChange}>
-					<SelectTrigger className="w-full sm:w-[160px] h-10 bg-[#111827]/50 border-slate-800/80 text-slate-300 hover:bg-slate-800/40 focus:border-blue-500 focus:ring-blue-500/20">
-						<SelectValue placeholder="All Priorities" />
-					</SelectTrigger>
-					<SelectContent className="bg-[#111827] border-slate-800 text-slate-300">
-						<SelectItem value="">All Priorities</SelectItem>
-						<SelectItem value="low">Low Priority</SelectItem>
-						<SelectItem value="medium">Medium Priority</SelectItem>
-						<SelectItem value="high">High Priority</SelectItem>
-					</SelectContent>
-				</Select>
+				<SelectInput
+					value={priorityFilter}
+					onValueChange={(val) => onPriorityFilterChange(val as TodoPriority | 'all')}
+					placeholder="All Priorities"
+					options={priorityOptions}
+				/>
 			</div>
 		</div>
 	);

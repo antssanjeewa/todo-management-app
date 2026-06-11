@@ -8,7 +8,7 @@ export interface Todo {
   description?: string | null;
   priority: TodoPriority;
   status: TodoStatus;
-  due_date?: string | null;
+  due_date?: Date | null;
   is_overdue: boolean;
   user_id: number;
   created_at: string;
@@ -16,15 +16,15 @@ export interface Todo {
 
 export interface TodoFilters {
   search?: string;
-  status?: TodoStatus;
-  priority?: TodoPriority;
+  status?: TodoStatus | "all";
+  priority?: TodoPriority | "all";
 }
 
 export interface CreateTodoPayload {
   title: string;
   description?: string;
   priority?: TodoPriority;
-  due_date?: string;
+  due_date?: Date;
 }
 
 export interface UpdateTodoPayload {
@@ -32,9 +32,24 @@ export interface UpdateTodoPayload {
   description?: string;
   status?: TodoStatus;
   priority?: TodoPriority;
-  due_date?: string;
+  due_date?: Date;
 }
 
 export interface TodoResponse {
-  todos: Todo[];
+  success: boolean;
+  message: string;
+  data: Todo;
+}
+
+export interface TodoListResponse {
+  success: boolean;
+  message: string;
+  data: {
+    todos: Todo[];
+    counts: {
+      total: number;
+      pending: number;
+      completed: number;
+    };
+  };
 }

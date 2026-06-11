@@ -26,11 +26,12 @@ class TodoController extends Controller
     $todos = $this->todoService->getFilteredTodos($request->user(), $request->only('search', 'status', 'priority'));
     $counts = $this->todoService->getCounts($request->user());
 
-    return response()->json([
-      'success' => true,
-      'todos' => TodoResource::collection($todos),
-      'counts' => $counts,
-    ]);
+    return response()->apiSuccess(
+      [
+        'todos' => TodoResource::collection($todos),
+        'counts' => $counts,
+      ]
+    );
   }
 
   public function store(StoreTodoRequest $request): JsonResponse

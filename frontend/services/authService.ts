@@ -30,8 +30,8 @@ export const authService = {
 		return response.data;
 	},
 
-	// getCurrentUser: () => {
-	//   const user = localStorage.getItem("user");
-	//   return user ? JSON.parse(user) : null;
-	// },
+	async getUser(): Promise<AuthResponse> {
+		const response = await api.get<AuthResponse>("/user");
+		return response.data;
+	},
 };

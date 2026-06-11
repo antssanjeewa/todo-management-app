@@ -1,15 +1,15 @@
 export const priorityConfig = {
   high: {
     label: "High",
-    className: "text-red-500",
+    className: "bg-red-800",
   },
   medium: {
     label: "Medium",
-    className: "text-yellow-500",
+    className: "bg-yellow-800",
   },
   low: {
     label: "Low",
-    className: "text-blue-500",
+    className: "bg-blue-800",
   },
 } as const;
 
