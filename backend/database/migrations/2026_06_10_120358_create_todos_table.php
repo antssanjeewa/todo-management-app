@@ -20,6 +20,9 @@ return new class extends Migration {
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();
+
+            $table->index(['user_id', 'status', 'priority']);
+            $table->index(['user_id', 'deleted_at']);
         });
     }
 

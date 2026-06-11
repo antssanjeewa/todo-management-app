@@ -10,8 +10,10 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { authService } from "@/services/authService";
+import { useAuth } from "@/context/AuthContext";
 
 export default function RegisterPage() {
+	const { setUser } = useAuth();
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
@@ -39,6 +41,7 @@ export default function RegisterPage() {
 
 			if (response.success) {
 				toast.success(response.message);
+				setUser(response.data);
 				router.push("/dashboard");
 			}
 		} catch (err: any) {
@@ -89,7 +92,7 @@ export default function RegisterPage() {
 							required
 							value={password}
 							onChange={(e) => setPassword(e.target.value)}
-							placeholder="•••••••• (Min 6 characters)"
+							placeholder="•••••••• (Min 8 characters)"
 							className="pr-10"
 						/>
 						<button

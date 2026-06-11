@@ -25,8 +25,7 @@ export default function UserInfo() {
         router.push("/login");
       }
     } catch (err: any) {
-      console.log("Error: ", err);
-    } finally {
+      toast.error(err.message);
     }
   };
   return (
@@ -36,7 +35,7 @@ export default function UserInfo() {
       ) : user ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 hover:opacity-80 transition">
+            <button className="flex gap-2 hover:opacity-80 transition focus-visible:outline-none">
 
               <div className="flex items-center gap-3">
 
@@ -44,7 +43,7 @@ export default function UserInfo() {
                   {user.name.charAt(0).toUpperCase()}
                 </div>
 
-                <div className="hidden sm:block text-right leading-tight">
+                <div className="hidden text-left sm:block leading-tight">
                   <p className="text-sm font-medium text-slate-200">{user.name}</p>
                   <p className="text-xs text-slate-500">{user.email}</p>
                 </div>

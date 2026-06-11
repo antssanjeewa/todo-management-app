@@ -28,6 +28,7 @@ class AuthService
     }
 
     $user = User::where('email', $credentials['email'])->firstOrFail();
+    $user->tokens()->delete();
     $user['access_token'] = $user->createToken('auth_token')->plainTextToken;
 
     return $user;

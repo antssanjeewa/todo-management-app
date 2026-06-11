@@ -6,8 +6,9 @@ export const authService = {
 	async login(credentials: LoginPayload): Promise<AuthResponse> {
 		const response = await api.post<AuthResponse>("/login", credentials);
 
-		if (response.data.success)
+		if (response.data.success){
 			authCookies.setToken(response.data.data.access_token);
+		}
 
 		return response.data;
 	},
@@ -15,8 +16,9 @@ export const authService = {
 	async register(data: RegisterPayload): Promise<AuthResponse> {
 		const response = await api.post<AuthResponse>("/register", data);
 
-		if (response.data.success)
+		if (response.data.success){
 			authCookies.setToken(response.data.data.access_token);
+		}
 
 		return response.data;
 	},
